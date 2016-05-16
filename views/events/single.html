@@ -1,0 +1,24 @@
+<top-bar></top-bar>
+
+<header class="h4">{{ event.title }}</header>
+<p>{{ event.date | date:'dd MMMM yyyy - HH:mm' }}</p>
+
+<hr>
+
+<p ng-hide="event_tracks[0]"><a class="btn" href="#/events/{{ id }}/songs">Add songs to this event</a></p>
+<div ng-show="event_tracks[0]">
+    <ul class="list-group">
+	    <p class="list-group-item lead">
+	        Songs
+	        <a href="#/events/{{ id }}/songs" class="pull-right" title="Add a song">
+	            <i class="fa fa-plus"></i>
+	        </a>
+	    </p>
+        <li class="list-group-item" ng-repeat="(key, track) in event_tracks">
+		    <a href="#/songs/{{ track.$value }}">
+        		{{ existing_tracks[track.$value].name }}
+    		</a>
+        	<span class="pull-right" ng-click="event_tracks.$remove(track);"><i class="fa fa-trash"></i></span>
+		</li>
+    </ul>
+</div>

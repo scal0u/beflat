@@ -1,0 +1,20 @@
+<form ng-submit="update()">
+
+	<top-bar></top-bar>
+
+	<fieldset>
+		<label for="name">Song title</label>
+		<input id="name" type="text" ng-model="track.name" class="form-control">
+	</fieldset>
+	<hr>
+	<fieldset>
+		<label for="artist">Artist</label>
+		<input id="artist" type="text" ng-model="track.artist" class="form-control">
+	</fieldset>
+	<hr>
+	<fieldset>
+		<label for="lyrics">Lyrics</label>
+		<textarea id="lyrics" ng-model="track.lyrics" class="form-control"></textarea>
+	</fieldset>
+
+</form>

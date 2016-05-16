@@ -1,0 +1,8 @@
+<top-bar></top-bar>
+
+<a href="#/events/{{ key }}" ng-repeat="(key, event) in group.events">            
+    <div class="row well">
+        <p class="h4">{{ event.title }}</p>
+        {{ event.date | date }}
+    </div>
+</a>

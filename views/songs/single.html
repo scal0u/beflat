@@ -1,0 +1,11 @@
+<top-bar></top-bar>
+
+<h1 class="h4">{{ track.name }}</h1>
+<p class="lead">{{ track.artist }}</p>
+
+<hr>
+
+<p ng-hide="lyrics" class="text-center">
+    <a href="#/songs/{{ id }}/edit" class="btn btn-default"> Add lyrics to this song </a>
+</p>
+<div ng-bind-html="lyrics"></div>
