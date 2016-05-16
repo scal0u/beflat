@@ -226,8 +226,4 @@ app.controller('songEditController', function($scope, $firebaseObject, $routePar
         $location.path('songs/'+$scope.id);
     };
 
-    // fb.child("/tracks/"+$scope.id).once('value', function(snap) {
-    //     $scope.track = snap.val();
-    // });
-
 });
