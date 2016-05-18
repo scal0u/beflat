@@ -8,8 +8,8 @@
 		        	Upcoming events <i class="fa fa-chevron-right pLeft"></i>
 		        </a>
         	</div>
-        	<div class="col-xs-4">
-		        <a href="#/events/add" class="btn btn-primary" title="Add an event">
+        	<div class="col-xs-4 pRight0">
+		        <a href="#/events/add" class="btn btn-primary btn-sm" title="Add an event">
 		            <i class="fa fa-plus"></i> Add
 		        </a>
         	</div>
@@ -17,8 +17,8 @@
     </li>
     <li class="list-group-item" ng-repeat="(key, event) in group.events">
 		<a href="#/events/{{ key }}">            
-	        <p class="h4">{{ event.title }}</p>
+	        <p class="h6">{{ event.title }}</p>
 		</a>
-        <span>{{ event.date | date }}</span>
+        <time><small>{{ event.date | date }}</small></time>
     </li>
 </ul>
