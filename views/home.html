@@ -1,8 +1,24 @@
 <top-bar></top-bar>
 
-<a href="#/events/{{ key }}" ng-repeat="(key, event) in group.events">            
-    <div class="row well">
-        <p class="h4">{{ event.title }}</p>
-        {{ event.date | date }}
-    </div>
-</a>
+<ul class="list-group">
+	<li class="list-group-item lead">
+        <div class="row">
+        	<div class="col-xs-8">
+		        <a href="#/events/" title="See all events" class="btn pLeft0">
+		        	Upcoming events <i class="fa fa-chevron-right pLeft"></i>
+		        </a>
+        	</div>
+        	<div class="col-xs-4">
+		        <a href="#/events/add" class="btn btn-primary" title="Add an event">
+		            <i class="fa fa-plus"></i> Add
+		        </a>
+        	</div>
+        </div>
+    </li>
+    <li class="list-group-item" ng-repeat="(key, event) in group.events">
+		<a href="#/events/{{ key }}">            
+	        <p class="h4">{{ event.title }}</p>
+		</a>
+        <span>{{ event.date | date }}</span>
+    </li>
+</ul>
