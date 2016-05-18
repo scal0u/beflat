@@ -3,11 +3,9 @@
 <header class="h4">{{ event.title }}</header>
 <p>{{ event.date | date:'dd MMMM yyyy - HH:mm' }}</p>
 
-<hr>
-
 <p ng-hide="event_tracks[0]"><a class="btn" href="#/events/{{ id }}/songs">Add songs to this event</a></p>
 <div ng-show="event_tracks[0]">
-    <ul class="list-group">
+    <ul class="list-group list-group-flush row">
 	    <p class="list-group-item lead">
 	        Songs
 	        <a href="#/events/{{ id }}/songs" class="pull-right" title="Add a song">

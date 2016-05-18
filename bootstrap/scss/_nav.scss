@@ -160,3 +160,32 @@
   // Remove the top rounded corners here since there is a hard edge above the menu
   @include border-top-radius(0);
 }
+
+
+//
+// Pascal's stuff
+//
+
+.topbar {
+  padding: 5px 0 !important;
+  text-align: center;
+  color: white;
+  background: $brand-primary;
+
+  .col-xs-2 {
+    padding: 5px;
+  }
+
+  .col-xs-8 {
+    padding: 5px;
+    padding-top: 12px;
+    margin-bottom: 0;
+  }
+
+  .btn {
+    background: transparent;
+    text-decoration: none;
+    color: inherit;
+  }
+}
+
