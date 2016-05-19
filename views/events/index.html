@@ -1,0 +1,10 @@
+<top-bar></top-bar>
+
+<ul class="list-group list-group-flush row">
+    <li class="list-group-item" ng-repeat="event in group.events">
+		<a href="#/events/{{ event.id }}">            
+	        <p class="h6">{{ event.title }}</p>
+		</a>
+        <time><small>{{ event.date | date }}</small></time>
+    </li>
+</ul>

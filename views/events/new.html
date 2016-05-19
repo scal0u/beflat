@@ -1,0 +1,27 @@
+<form ng-submit="addEvent()">
+
+	<top-bar></top-bar>
+
+	<fieldset>
+		<label for="title">Event title</label>
+		<input type="text" id="title" class="form-control" ng-model="event.title" placeholder="e.g. Rehearsal of new songs">
+	</fieldset>
+
+	<hr>
+
+	<fieldset>
+		<label for="date">Event date</label>	
+		<input id="date" type="datetime-local" ng-model="event.date" class="form-control">
+	</fieldset>
+
+	<hr>
+
+	<fieldset>
+		<label for="type">Event type</label>
+		<select id="type" ng-model="event.type" class="form-control">
+			<option value="concert">Concert</option>
+			<option value="rehearsal">Rehearsal</option>
+		</select>
+	</fieldset>
+	
+</form>

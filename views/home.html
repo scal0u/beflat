@@ -5,20 +5,26 @@
         <div class="row">
         	<div class="col-xs-8">
 		        <a href="#/events/" title="See all events" class="btn pLeft0">
-		        	Upcoming events <i class="fa fa-chevron-right pLeft"></i>
+		        	Upcoming events
 		        </a>
         	</div>
-        	<div class="col-xs-4 pRight0">
-		        <a href="#/events/add" class="btn btn-primary btn-sm" title="Add an event">
-		            <i class="fa fa-plus"></i> Add
+        	<div class="col-xs-4">
+		        <a href="#/events/new" class="btn pull-right" title="Add an event">
+		            Add <i class="fa fa-plus"></i>
 		        </a>
         	</div>
         </div>
     </li>
-    <li class="list-group-item" ng-repeat="(key, event) in group.events">
-		<a href="#/events/{{ key }}">            
+    <!-- SHOULD NOT BE KEY BUT FIREBASE KEY -->
+    <li class="list-group-item" ng-repeat="event in group.events | limitTo :5"> 
+		<a href="#/events/{{ event.id }}">
 	        <p class="h6">{{ event.title }}</p>
 		</a>
         <time><small>{{ event.date | date }}</small></time>
+    </li>
+    <li class="list-group-item text-right">
+        <a href="#/events/" title="See all events">
+	    	<small>See all events <i class="fa fa-chevron-right pLeft"></i></small>
+		</a>
     </li>
 </ul>

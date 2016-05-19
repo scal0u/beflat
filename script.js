@@ -8,16 +8,24 @@ app.config(['$routeProvider', function($routeProvider) {
         templateUrl: 'views/home.html',
         controller: 'homeController'
     })
+    .when('/events/', {
+        templateUrl: 'views/events/index.html',
+        controller: 'eventListController'
+    })
+    .when('/events/new', {
+        templateUrl: 'views/events/new.html',
+        controller: 'newEventController'
+    })
     .when('/events/:eventId', {
         templateUrl: 'views/events/single.html',
-        controller: 'eventController'
+        controller: 'singleEventController'
     })
     .when('/events/:eventId/edit', {
         templateUrl: 'views/events/edit.html',
         controller: 'eventEditController'
     })
     .when('/songs/new/:eventId', {
-        templateUrl: 'views/songs/add.html',
+        templateUrl: 'views/songs/new.html',
         controller: 'newSongController'
     })
     .when('/songs/:songId', {
@@ -41,7 +49,6 @@ app.directive("topBar", function() {
 app.controller('homeController', function($scope, $firebaseArray) {
 
     $scope.page = {
-        leftBtn: {fa: "bars"},
         rightBtn: {fa: "bell"},
     };
 
@@ -57,10 +64,13 @@ app.controller('homeController', function($scope, $firebaseArray) {
         // Getting group name
         $scope.page.title = snap.val().name;
 
+        $scope.group_events = snap.val().events;
+
         // Getting group events
-        for(event in snap.val().events) {
-            fb.child("/events/"+snap.val().events[event].id).once('value', function(snap) {
+        for(group_event in $scope.group_events) {
+            fb.child("/events/"+$scope.group_events[group_event].id).once('value', function(snap) {
                 var event = snap.val();
+                event.id = $scope.group_events[group_event].id;
                 event.date = new Date(event.date);
                 $scope.group.events.push(event);
             });
@@ -69,13 +79,47 @@ app.controller('homeController', function($scope, $firebaseArray) {
     
 });
 
-app.controller('eventController', function($scope, $firebaseArray, $routeParams) {
+app.controller('eventListController', function($scope, $firebaseArray) {
+
+    $scope.page = {
+        title: "Events",
+        leftBtn: "prev",
+        rightBtn: {fa: "plus", href: "events/new"},
+    };
+
+    var fb = new Firebase("https://beflat.firebaseio.com/");
+    $scope.fb = $firebaseArray(fb);
+
+    $scope.group = {
+        id: "-KGrBTtHxJyADLwIeJ1l",
+        events: [],
+    };
+
+    fb.child("/groups/"+$scope.group.id).once('value', function(snap) {
+
+        $scope.group_events = snap.val().events;
+
+        // Getting group events
+        for(group_event in $scope.group_events) {
+            fb.child("/events/"+$scope.group_events[group_event].id).once('value', function(snap) {
+                var event = snap.val();
+                event.id = $scope.group_events[group_event].id;
+                event.date = new Date(event.date);
+                $scope.group.events.push(event);
+            });
+        }
+        
+    });
+    
+});
+
+app.controller('singleEventController', function($scope, $firebaseArray, $routeParams) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.eventId;
 
     $scope.page = {
-        leftBtn: {fa: "chevron-left"},
+        leftBtn: {fa: "chevron-left", href: "/"},
         rightBtn: {fa: "edit", href: "events/"+$scope.id+"/edit"},
         title: "Event",
     };
@@ -161,6 +205,44 @@ app.controller('eventSongsController', function($scope, $firebaseArray, $routePa
 
 });
 
+app.controller('newEventController', function($scope, $firebaseArray, $location) {
+
+    var fb = new Firebase("https://beflat.firebaseio.com/");
+    $scope.fb = $firebaseArray(fb);
+
+    $scope.group = {
+        id: "-KGrBTtHxJyADLwIeJ1l",
+        events: [],
+    };
+
+    $scope.events = $firebaseArray(fb.child("events"));
+    $scope.group_events = $firebaseArray(fb.child("groups/"+$scope.group.id+"/events"));
+
+    $scope.page = {
+        title: "Add event",
+        leftBtn: "prev",
+        rightBtn: "submit",
+    };
+
+    $scope.event = {
+        title: "", 
+        type: "rehearsal",
+        // date: new Date(),
+    };
+
+    $scope.addEvent = function() {
+        $scope.event.date = $scope.event.date.toString();
+        $scope.events.$add($scope.event).then(function(ref) {
+            var id = ref.key();
+            console.log("added record with id " + id);
+            $scope.group_events.$add({'id': id}).then(function(ref) {
+                $location.path('events/');
+            });
+        });
+    };
+
+});
+
 app.controller('newSongController', function($scope, $firebaseArray, $routeParams, $location) {
 
     $scope.params = $routeParams;
@@ -170,6 +252,12 @@ app.controller('newSongController', function($scope, $firebaseArray, $routeParam
     $scope.fb = $firebaseArray(fb);
 
     $scope.tracks = $firebaseArray(fb.child("tracks"));
+
+    $scope.page = {
+        title: "Add song",
+        leftBtn: "prev",
+        rightBtn: "submit",
+    };
 
     $scope.song = {
         name: "",
