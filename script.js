@@ -47,7 +47,12 @@ app.directive("topBar", function() {
 });
 
 
-app.factory('group', ["$firebaseArray", function ($firebaseArray) {
+
+app.factory('fb', ["$firebaseArray", function () {
+    return new Firebase("https://beflat.firebaseio.com/");
+}]);
+
+app.factory('group', ["$firebaseArray", "fb", function ($firebaseArray, fb) {
     return {
         data: function () {
 
@@ -56,7 +61,6 @@ app.factory('group', ["$firebaseArray", function ($firebaseArray) {
                 events: [],
             };
 
-            var fb = new Firebase("https://beflat.firebaseio.com/");
 
             fb.child("/groups/"+group.id).once('value', function(snap) {
 
@@ -74,26 +78,24 @@ app.factory('group', ["$firebaseArray", function ($firebaseArray) {
             });
 
             return group;
-
         }
     };
 }]);
 
 
-app.controller('homeController', function(group, $scope, $firebaseObject) {
+app.controller('homeController', function(fb, group, $scope, $firebaseObject) {
 
     $scope.page = {
         rightBtn: {fa: "bell"},
     };
 
-    var fb = new Firebase("https://beflat.firebaseio.com/");
     $scope.fb = $firebaseObject(fb);
 
     $scope.group = group.data();
-    
+
 });
 
-app.controller('eventListController', function(group, $scope, $firebaseArray) {
+app.controller('eventListController', function(fb, group, $scope, $firebaseArray) {
 
     $scope.page = {
         title: "Events",
@@ -101,14 +103,13 @@ app.controller('eventListController', function(group, $scope, $firebaseArray) {
         rightBtn: {fa: "plus", href: "events/new"},
     };
 
-    var fb = new Firebase("https://beflat.firebaseio.com/");
     $scope.fb = $firebaseArray(fb);
 
     $scope.group = group.data();
     
 });
 
-app.controller('singleEventController', function(group, $scope, $firebaseArray, $routeParams) {
+app.controller('singleEventController', function(fb, group, $scope, $firebaseArray, $routeParams) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.eventId;
@@ -119,7 +120,6 @@ app.controller('singleEventController', function(group, $scope, $firebaseArray, 
         title: "Event",
     };
 
-    var fb = new Firebase("https://beflat.firebaseio.com/");
     $scope.fb = $firebaseArray(fb);
     fb.child("/tracks/").once('value', function(snap) {
         $scope.existing_tracks = snap.val();
@@ -134,7 +134,7 @@ app.controller('singleEventController', function(group, $scope, $firebaseArray, 
 
 });
 
-app.controller('eventEditController', function(group, $scope, $firebaseObject, $routeParams, $location) {
+app.controller('eventEditController', function(fb, group, $scope, $firebaseObject, $routeParams, $location) {
 
     $scope.page = {
         leftBtn: {fa: "chevron-left"},
@@ -160,14 +160,13 @@ app.controller('eventEditController', function(group, $scope, $firebaseObject, $
 
 });
 
-app.controller('eventSongsController', function(group, $scope, $firebaseArray, $routeParams, $location) {
+app.controller('eventSongsController', function(fb, group, $scope, $firebaseArray, $routeParams, $location) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.eventId;
 
     $scope.tracks = [];
 
-    var fb = new Firebase("https://beflat.firebaseio.com/");
     $scope.fb = $firebaseArray(fb);
 
     // Getting current event tracks
@@ -200,9 +199,8 @@ app.controller('eventSongsController', function(group, $scope, $firebaseArray, $
 
 });
 
-app.controller('newEventController', function(group, $scope, $firebaseArray, $location) {
+app.controller('newEventController', function(fb, group, $scope, $firebaseArray, $location) {
 
-    var fb = new Firebase("https://beflat.firebaseio.com/");
     $scope.fb = $firebaseArray(fb);
 
     $scope.group = group.data();
@@ -235,12 +233,11 @@ app.controller('newEventController', function(group, $scope, $firebaseArray, $lo
 
 });
 
-app.controller('newSongController', function(group, $scope, $firebaseArray, $routeParams, $location) {
+app.controller('newSongController', function(fb, group, $scope, $firebaseArray, $routeParams, $location) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.eventId;
 
-    var fb = new Firebase("https://beflat.firebaseio.com/");
     $scope.fb = $firebaseArray(fb);
 
     $scope.tracks = $firebaseArray(fb.child("tracks"));
@@ -266,12 +263,11 @@ app.controller('newSongController', function(group, $scope, $firebaseArray, $rou
 
 });
 
-app.controller('singleSongController', function(group, $scope, $firebaseObject, $routeParams, $sce) {
+app.controller('singleSongController', function(fb, group, $scope, $firebaseObject, $routeParams, $sce) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.songId;
 
-    var fb = new Firebase("https://beflat.firebaseio.com/");
 
     $scope.page = {
         leftBtn: "prev",
@@ -286,7 +282,7 @@ app.controller('singleSongController', function(group, $scope, $firebaseObject, 
 
 });
 
-app.controller('songEditController', function(group, $scope, $firebaseObject, $routeParams, $location) {
+app.controller('songEditController', function(fb, group, $scope, $firebaseObject, $routeParams, $location) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.songId;
