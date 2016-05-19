@@ -46,40 +46,54 @@ app.directive("topBar", function() {
     return {templateUrl : "views/topbar.html"};
 });
 
-app.controller('homeController', function($scope, $firebaseArray) {
+
+app.factory('group', ["$firebaseArray", function ($firebaseArray) {
+    return {
+        data: function () {
+
+            var group =  {
+                id: "-KGrBTtHxJyADLwIeJ1l",
+                events: [],
+            };
+
+            var fb = new Firebase("https://beflat.firebaseio.com/");
+
+            fb.child("/groups/"+group.id).once('value', function(snap) {
+
+                var group_events = snap.val().events;
+
+                // Getting group events
+                for(group_event in group_events) {
+                    fb.child("/events/"+group_events[group_event].id).once('value', function(snap) {
+                        var event = snap.val();
+                        event.id = group_events[group_event].id;
+                        event.date = new Date(event.date);
+                        group.events.push(event);
+                    });
+                }
+            });
+
+            return group;
+
+        }
+    };
+}]);
+
+
+app.controller('homeController', function(group, $scope, $firebaseObject) {
 
     $scope.page = {
         rightBtn: {fa: "bell"},
     };
 
     var fb = new Firebase("https://beflat.firebaseio.com/");
-    $scope.fb = $firebaseArray(fb);
+    $scope.fb = $firebaseObject(fb);
 
-    $scope.group = {
-        id: "-KGrBTtHxJyADLwIeJ1l",
-        events: [],
-    };
-
-    fb.child("/groups/"+$scope.group.id).once('value', function(snap) {
-        // Getting group name
-        $scope.page.title = snap.val().name;
-
-        $scope.group_events = snap.val().events;
-
-        // Getting group events
-        for(group_event in $scope.group_events) {
-            fb.child("/events/"+$scope.group_events[group_event].id).once('value', function(snap) {
-                var event = snap.val();
-                event.id = $scope.group_events[group_event].id;
-                event.date = new Date(event.date);
-                $scope.group.events.push(event);
-            });
-        }
-    });
+    $scope.group = group.data();
     
 });
 
-app.controller('eventListController', function($scope, $firebaseArray) {
+app.controller('eventListController', function(group, $scope, $firebaseArray) {
 
     $scope.page = {
         title: "Events",
@@ -90,30 +104,11 @@ app.controller('eventListController', function($scope, $firebaseArray) {
     var fb = new Firebase("https://beflat.firebaseio.com/");
     $scope.fb = $firebaseArray(fb);
 
-    $scope.group = {
-        id: "-KGrBTtHxJyADLwIeJ1l",
-        events: [],
-    };
-
-    fb.child("/groups/"+$scope.group.id).once('value', function(snap) {
-
-        $scope.group_events = snap.val().events;
-
-        // Getting group events
-        for(group_event in $scope.group_events) {
-            fb.child("/events/"+$scope.group_events[group_event].id).once('value', function(snap) {
-                var event = snap.val();
-                event.id = $scope.group_events[group_event].id;
-                event.date = new Date(event.date);
-                $scope.group.events.push(event);
-            });
-        }
-        
-    });
+    $scope.group = group.data();
     
 });
 
-app.controller('singleEventController', function($scope, $firebaseArray, $routeParams) {
+app.controller('singleEventController', function(group, $scope, $firebaseArray, $routeParams) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.eventId;
@@ -139,7 +134,7 @@ app.controller('singleEventController', function($scope, $firebaseArray, $routeP
 
 });
 
-app.controller('eventEditController', function($scope, $firebaseObject, $routeParams, $location) {
+app.controller('eventEditController', function(group, $scope, $firebaseObject, $routeParams, $location) {
 
     $scope.page = {
         leftBtn: {fa: "chevron-left"},
@@ -165,7 +160,7 @@ app.controller('eventEditController', function($scope, $firebaseObject, $routePa
 
 });
 
-app.controller('eventSongsController', function($scope, $firebaseArray, $routeParams, $location) {
+app.controller('eventSongsController', function(group, $scope, $firebaseArray, $routeParams, $location) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.eventId;
@@ -205,15 +200,12 @@ app.controller('eventSongsController', function($scope, $firebaseArray, $routePa
 
 });
 
-app.controller('newEventController', function($scope, $firebaseArray, $location) {
+app.controller('newEventController', function(group, $scope, $firebaseArray, $location) {
 
     var fb = new Firebase("https://beflat.firebaseio.com/");
     $scope.fb = $firebaseArray(fb);
 
-    $scope.group = {
-        id: "-KGrBTtHxJyADLwIeJ1l",
-        events: [],
-    };
+    $scope.group = group.data();
 
     $scope.events = $firebaseArray(fb.child("events"));
     $scope.group_events = $firebaseArray(fb.child("groups/"+$scope.group.id+"/events"));
@@ -243,7 +235,7 @@ app.controller('newEventController', function($scope, $firebaseArray, $location)
 
 });
 
-app.controller('newSongController', function($scope, $firebaseArray, $routeParams, $location) {
+app.controller('newSongController', function(group, $scope, $firebaseArray, $routeParams, $location) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.eventId;
@@ -274,7 +266,7 @@ app.controller('newSongController', function($scope, $firebaseArray, $routeParam
 
 });
 
-app.controller('singleSongController', function($scope, $firebaseObject, $routeParams, $sce) {
+app.controller('singleSongController', function(group, $scope, $firebaseObject, $routeParams, $sce) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.songId;
@@ -294,7 +286,7 @@ app.controller('singleSongController', function($scope, $firebaseObject, $routeP
 
 });
 
-app.controller('songEditController', function($scope, $firebaseObject, $routeParams, $location) {
+app.controller('songEditController', function(group, $scope, $firebaseObject, $routeParams, $location) {
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.songId;
