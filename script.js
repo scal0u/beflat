@@ -145,7 +145,9 @@ app.controller('eventEditController', function(fb, group, $scope, $firebaseObjec
 
     $scope.event = $firebaseObject(fb.child("/events/"+$scope.id));
 
-    fb.once('value', function(snap) {
+    // STRANGE STUFF: Only way I found to edit date in right format
+    // NOT necessary for most objects
+    fb.child("/events/"+$scope.id).once('value', function(snap) {
         $scope.date = new Date(snap.val().date);
     });
 
