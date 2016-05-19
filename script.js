@@ -61,7 +61,6 @@ app.factory('group', ["$firebaseArray", "fb", function ($firebaseArray, fb) {
                 events: [],
             };
 
-
             fb.child("/groups/"+group.id).once('value', function(snap) {
 
                 var group_events = snap.val().events;
@@ -266,7 +265,6 @@ app.controller('singleSongController', function(fb, group, $scope, $firebaseObje
     $scope.params = $routeParams;
     $scope.id = $scope.params.songId;
 
-
     $scope.page = {
         leftBtn: "prev",
         rightBtn: {fa: "edit", href: "songs/"+$scope.id+"/edit"},
@@ -284,7 +282,6 @@ app.controller('songEditController', function(fb, group, $scope, $firebaseObject
 
     $scope.params = $routeParams;
     $scope.id = $scope.params.songId;
-
 
     $scope.page = {
         leftBtn: "prev",
