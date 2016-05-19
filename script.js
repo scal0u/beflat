@@ -129,8 +129,7 @@ app.controller('singleEventController', function(fb, group, $scope, $firebaseArr
         $scope.event.date = new Date($scope.event.date);
     });
 
-    var event_tracks = new Firebase("https://beflat.firebaseio.com/"+"/events/"+$scope.id+"/tracks");
-    $scope.event_tracks = $firebaseArray(event_tracks);
+    $scope.event_tracks = $firebaseArray(fb.child("/events/"+$scope.id+"/tracks"));
 
 });
 
@@ -145,8 +144,7 @@ app.controller('eventEditController', function(fb, group, $scope, $firebaseObjec
     $scope.params = $routeParams;
     $scope.id = $scope.params.eventId;
 
-    var fb = new Firebase("https://beflat.firebaseio.com/events/"+$scope.id);
-    $scope.event = $firebaseObject(fb);
+    $scope.event = $firebaseObject(fb.child("/events/"+$scope.id));
 
     fb.once('value', function(snap) {
         $scope.date = new Date(snap.val().date);
@@ -294,8 +292,7 @@ app.controller('songEditController', function(fb, group, $scope, $firebaseObject
         title: "Edit song",
     };
 
-    var fb = new Firebase("https://beflat.firebaseio.com/tracks/"+$scope.id);
-    $scope.track = $firebaseObject(fb);
+    $scope.track = $firebaseObject(fb.child("/tracks/"+$scope.id));
 
     $scope.update = function() {
         $scope.track.$save();
