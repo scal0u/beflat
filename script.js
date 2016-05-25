@@ -56,45 +56,69 @@ app.factory('group', ["$firebaseArray", "fb", function ($firebaseArray, fb) {
     return {
         data: function () {
 
-            var group =  {
+            var theGroup = {
                 id: "-KGrBTtHxJyADLwIeJ1l",
+                name: "",
                 events: [],
             };
 
-            fb.child("/groups/"+group.id).once('value', function(snap) {
-
-                var group_events = snap.val().events;
-
+            fb.child("/groups/"+theGroup.id).once('value', function(groupSnap) {
+                
                 // Getting group events
+                var group_events = groupSnap.val().events;
                 for(group_event in group_events) {
-                    fb.child("/events/"+group_events[group_event].id).once('value', function(snap) {
-                        var event = snap.val();
+                    fb.child("/events/"+group_events[group_event].id).once('value', function(eventSnap) {
+                        var event = eventSnap.val();
                         event.id = group_events[group_event].id;
                         event.date = new Date(event.date);
-                        group.events.push(event);
+                        theGroup.events.push(event);
                     });
                 }
+
             });
 
-            return group;
-        }
+            return theGroup;
+        },
+
+    };
+}]);
+
+app.factory('event', ["$firebaseArray", "fb", function ($firebaseArray, fb) {
+    return {
+
+        delete: function(event, group_id) {
+            if(confirm("Do you wish to delete this event?")) {
+
+                // Remove in events node
+                fb.child("/events/"+event.id).remove();
+
+                // Remove in group > events node
+                var ref = fb.child("/groups/"+group_id+"/events/");
+                ref.orderByChild("id").equalTo(event.id).on("child_added", function(snapshot) {
+                    fb.child("/groups/"+group_id+"/events/"+snapshot.key()).remove();
+                });
+
+            }
+        },
+
     };
 }]);
 
 
 app.controller('homeController', function(fb, group, $scope, $firebaseObject) {
 
-    $scope.page = {
-        rightBtn: {fa: "bell"},
-    };
-
     $scope.fb = $firebaseObject(fb);
 
     $scope.group = group.data();
 
+    $scope.page = {
+        rightBtn: {fa: "bell"},
+        title: $scope.group.name,
+    };
+
 });
 
-app.controller('eventListController', function(fb, group, $scope, $firebaseArray) {
+app.controller('eventListController', function(fb, group, event, $scope, $firebaseArray) {
 
     $scope.page = {
         title: "Events",
@@ -105,7 +129,12 @@ app.controller('eventListController', function(fb, group, $scope, $firebaseArray
     $scope.fb = $firebaseArray(fb);
 
     $scope.group = group.data();
-    
+    $scope.event = event;
+
+    $scope.delete = function(event) {
+        $scope.event.delete(event, $scope.group.id);
+    }
+
 });
 
 app.controller('singleEventController', function(fb, group, $scope, $firebaseArray, $routeParams) {

@@ -2,6 +2,9 @@
 
 <ul class="list-group list-group-flush row">
     <li class="list-group-item" ng-repeat="event in group.events">
+        <a class="pull-right btn" ng-click="delete(event)">
+        	<i class="fa fa-trash"></i>
+    	</a>
 		<a href="#/events/{{ event.id }}">            
 	        <p class="h6">{{ event.title }}</p>
 		</a>
