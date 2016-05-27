@@ -27,3 +27,15 @@
 		</a>
     </li>
 </ul>
+
+
+<hr>
+
+<input type="text" ng-model="email" placeholder="email" />
+<input type="password" ng-model="password" placeholder="password" />
+<button ng-click="logIn()">OK</button>
+<button ng-click="createUser()">+</button>
+<button ng-click="removeUser()">-</button>
+
+<hr>
+<pre> authData: {{ authData | json }}</pre>

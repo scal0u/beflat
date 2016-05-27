@@ -105,7 +105,13 @@ app.factory('event', ["$firebaseArray", "fb", function ($firebaseArray, fb) {
 }]);
 
 
-app.controller('homeController', function(fb, group, $scope, $firebaseObject) {
+app.factory("Auth", ["$firebaseAuth", "fb", 
+    function($firebaseAuth, fb) {
+        return $firebaseAuth(fb);
+    }
+]);
+
+app.controller('homeController', function(fb, group, $scope, $firebaseObject, Auth) {
 
     $scope.fb = $firebaseObject(fb);
 
@@ -115,6 +121,60 @@ app.controller('homeController', function(fb, group, $scope, $firebaseObject) {
         rightBtn: {fa: "bell"},
         title: $scope.group.name,
     };
+
+    /////
+    $scope.auth = Auth;
+
+    $scope.logIn = function() {
+        $scope.message = null;
+        $scope.error = null;
+
+        $scope.auth.$authWithPassword({
+            email: $scope.email,
+            password: $scope.password
+        }).then(function(authData) {
+            console.log("Logged in as:", authData.uid);
+        }).catch(function(error) {
+            console.error("Authentication failed:", error);
+        });
+
+
+    };
+
+    $scope.createUser = function() {
+        $scope.message = null;
+        $scope.error = null;
+
+        Auth.$createUser({
+            email: $scope.email,
+            password: $scope.password
+        }).then(function(userData) {
+            $scope.message = "User created with uid: " + userData.uid;
+            console.log("coucou");
+        }).catch(function(error) {
+            console.log("error");
+            $scope.error = error;
+        });
+    };
+
+    $scope.removeUser = function() {
+        $scope.message = null;
+        $scope.error = null;
+
+        Auth.$removeUser({
+            email: $scope.email,
+            password: $scope.password
+        }).then(function() {
+            $scope.message = "User removed";
+        }).catch(function(error) {
+            $scope.error = error;
+        });
+    };
+
+    // any time auth status updates, add the user data to scope
+    $scope.auth.$onAuth(function(authData) {
+        $scope.authData = authData;
+    });
 
 });
 
