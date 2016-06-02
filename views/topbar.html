@@ -1,7 +1,13 @@
 <nav class="navbar navbar-fixed-top topbar p0">
  	<div class="collapse" id="exCollapsingNavbar">
 		<div class="bg-inverse p-a-1">
-			<p>Collapsed content</p>
+
+	    	<div ng-controller="topBarController" class="panel">
+				<button class="btn btn-primary" ng-click="logOut()" ng-show="auth">
+					<i class="fa fa-sign-out"></i> Log out
+				</button>
+	    	</div>
+
 		</div>
 	</div>
 	<div class='col-xs-2' ng-hide="page.leftBtn">

@@ -133,6 +133,18 @@ app.factory("Auth", ["$firebaseAuth", "fb",
     }
 ]);
 
+app.controller('topBarController', function(fb, $scope, $location, Auth) {
+
+    if(Auth.$getAuth()) $scope.auth = true;
+    else $scope.auth = false;
+
+    $scope.logOut = function() {
+        $location.path('auth');
+        fb.unauth();
+    };
+    
+});
+
 app.controller('homeController', function(fb, group, $scope, $firebaseObject) {
 
     $scope.fb = $firebaseObject(fb);
