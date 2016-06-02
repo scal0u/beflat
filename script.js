@@ -2,51 +2,73 @@
 
 var app = angular.module('myApp', ["firebase", "ngRoute"]);
 
+app.run(["$rootScope", "$location", function($rootScope, $location) {
+    $rootScope.$on("$routeChangeError", function(event, next, previous, error) {
+        // We can catch the error thrown when the $requireAuth promise is rejected
+        // and redirect the user back to the home page
+        if (error === "AUTH_REQUIRED") {
+            $location.path("/auth");
+        }
+    });
+}]);
+
 app.config(['$routeProvider', function($routeProvider) {
+    var resolve = {"currentAuth": ["Auth", function(Auth) {return Auth.$requireAuth();}]};
     $routeProvider
+    .when('/auth/', {
+        templateUrl: 'views/auth.html',
+        controller: 'authController',
+    })
     .when('/', {
         templateUrl: 'views/home.html',
-        controller: 'homeController'
+        controller: 'homeController',
+        resolve: resolve,
     })
     .when('/events/', {
         templateUrl: 'views/events/index.html',
-        controller: 'eventListController'
+        controller: 'eventListController',
+        resolve: resolve,
     })
     .when('/events/new', {
         templateUrl: 'views/events/new.html',
-        controller: 'newEventController'
+        controller: 'newEventController',
+        resolve: resolve,
     })
     .when('/events/:eventId', {
         templateUrl: 'views/events/single.html',
-        controller: 'singleEventController'
+        controller: 'singleEventController',
+        resolve: resolve,
     })
     .when('/events/:eventId/edit', {
         templateUrl: 'views/events/edit.html',
-        controller: 'eventEditController'
+        controller: 'eventEditController',
+        resolve: resolve,
     })
     .when('/songs/new/:eventId', {
         templateUrl: 'views/songs/new.html',
-        controller: 'newSongController'
+        controller: 'newSongController',
+        resolve: resolve,
     })
     .when('/songs/:songId', {
         templateUrl: 'views/songs/single.html',
-        controller: 'singleSongController'
+        controller: 'singleSongController',
+        resolve: resolve,
     })
     .when('/songs/:songId/edit', {
         templateUrl: 'views/songs/edit.html',
-        controller: 'songEditController'
+        controller: 'songEditController',
+        resolve: resolve,
     })
     .when('/events/:eventId/songs', {
         templateUrl: 'views/events/songs.html',
-        controller: 'eventSongsController'
+        controller: 'eventSongsController',
+        resolve: resolve,
     });
 }]);
 
 app.directive("topBar", function() {
     return {templateUrl : "views/topbar.html"};
 });
-
-
 
 app.factory('fb', ["$firebaseArray", function () {
     return new Firebase("https://beflat.firebaseio.com/");
@@ -111,7 +133,7 @@ app.factory("Auth", ["$firebaseAuth", "fb",
     }
 ]);
 
-app.controller('homeController', function(fb, group, $scope, $firebaseObject, Auth) {
+app.controller('homeController', function(fb, group, $scope, $firebaseObject) {
 
     $scope.fb = $firebaseObject(fb);
 
@@ -122,7 +144,16 @@ app.controller('homeController', function(fb, group, $scope, $firebaseObject, Au
         title: $scope.group.name,
     };
 
-    /////
+});
+
+app.controller('authController', function(fb, $scope, Auth, $location) {
+
+    $scope.page = {
+        // title: "Login",
+        // leftBtn: "prev",
+        // rightBtn: {fa: "plus", href: "events/new"},
+    };
+
     $scope.auth = Auth;
 
     $scope.logIn = function() {
@@ -137,8 +168,11 @@ app.controller('homeController', function(fb, group, $scope, $firebaseObject, Au
         }).catch(function(error) {
             console.error("Authentication failed:", error);
         });
+    };
 
-
+    $scope.logOut = function() {
+        // $scope.message = null;
+        fb.unauth();
     };
 
     $scope.createUser = function() {
@@ -174,6 +208,7 @@ app.controller('homeController', function(fb, group, $scope, $firebaseObject, Au
     // any time auth status updates, add the user data to scope
     $scope.auth.$onAuth(function(authData) {
         $scope.authData = authData;
+
     });
 
 });

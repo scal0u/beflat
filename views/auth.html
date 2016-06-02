@@ -1,0 +1,31 @@
+<top-bar></top-bar>
+
+<div class="text-center">
+	<h1>Welcome!</h1>
+
+	<div class="panel">
+
+		<form>
+			<legend class="lead">Please log in to continue</legend>
+			<div class="form-group">
+				<label class="small" for="email">Your email</label>
+				<input id="email" type="text" ng-model="email" placeholder="email" class="form-control text-center" />
+			</div>
+			<div class="form-group">
+				<label class="small" for="password">Your password</label>
+				<input id="password" type="password" ng-model="password" placeholder="password" class="form-control text-center" />
+			</div>
+			<hr>
+			<div class="form-group">
+				<button class="btn btn-primary" ng-click="logIn()">Log in</button>
+				<button class="btn btn-secondary" ng-click="createUser()">Sign up</button>
+			</div>
+			<a href="#" class="btn btn-sm btn-secondary">Erm, I forgot...</a>
+		</form>
+
+		<!-- <button ng-click="logOut()">x</button> -->
+		<!-- <p>{{ authData.uid }}</p> -->
+
+	</div>
+	
+</div>
