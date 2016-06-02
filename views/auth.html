@@ -1,30 +1,44 @@
 <top-bar></top-bar>
 
 <div class="text-center">
-	<h1>Welcome!</h1>
+	
+	<h1 ng-hide="error">Welcome!</h1>
+	<div class="alert alert-warning" role="alert" ng-show="error">
+		<!-- {{error.code}} -->
+		<div ng-show="error.code == 'EMAIL_TAKEN'">
+			There's an account with that email already.
+			<hr>
+			<a href="#" class="btn btn-secondary btn-sm">Forgotten password?</a>
+		</div>
+		<div ng-show="error.code == 'INVALID_USER'">
+			Sorry, we couldn't find an account with that email.
+			<hr>
+			<a href="#" class="btn btn-secondary btn-sm">Create new account</a>
+		</div>
+		<div ng-show="error.code == 'INVALID_PASSWORD'">
+			Sorry, your password does not match. Please try again.
+		</div>
+	</div>
 
 	<div class="panel">
 
 		<form>
 			<legend class="lead">Please log in to continue</legend>
-			<div class="form-group">
-				<label class="small" for="email">Your email</label>
-				<input id="email" type="text" ng-model="email" placeholder="email" class="form-control text-center" />
+			<div class="form-group" ng-class="{'has-warning': error.code == 'EMAIL_TAKEN' || error.code == 'INVALID_USER'}">
+				<label class="small form-control-label" for="email">Your email</label>
+				<input id="email" type="email" ng-model="email" placeholder="email" class="form-control text-center" />
 			</div>
-			<div class="form-group">
-				<label class="small" for="password">Your password</label>
+			<div class="form-group" ng-class="{'has-warning': error.code == 'INVALID_PASSWORD'}">
+				<label class="small form-control-label" for="password">Your password</label>
 				<input id="password" type="password" ng-model="password" placeholder="password" class="form-control text-center" />
 			</div>
 			<hr>
 			<div class="form-group">
-				<button class="btn btn-primary" ng-click="logIn()">Log in</button>
-				<button class="btn btn-secondary" ng-click="createUser()">Sign up</button>
+				<button class="btn btn-primary" ng-click="logIn()" ng-disabled="!email || !password">Log in</button>
+				<button class="btn btn-secondary" ng-click="signUp()" ng-disabled="!email || !password">Sign up</button>
 			</div>
 			<a href="#" class="btn btn-sm btn-secondary">Erm, I forgot...</a>
 		</form>
-
-		<!-- <button ng-click="logOut()">x</button> -->
-		<!-- <p>{{ authData.uid }}</p> -->
 
 	</div>
 	

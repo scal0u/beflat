@@ -169,44 +169,31 @@ app.controller('authController', function(fb, $scope, Auth, $location) {
     $scope.auth = Auth;
 
     $scope.logIn = function() {
-        $scope.message = null;
-        $scope.error = null;
-
         $scope.auth.$authWithPassword({
             email: $scope.email,
             password: $scope.password
         }).then(function(authData) {
             console.log("Logged in as:", authData.uid);
+            $location.path('/');
         }).catch(function(error) {
             console.error("Authentication failed:", error);
+            $scope.error = error;
         });
     };
 
-    $scope.logOut = function() {
-        // $scope.message = null;
-        fb.unauth();
-    };
-
-    $scope.createUser = function() {
-        $scope.message = null;
-        $scope.error = null;
-
+    $scope.signUp = function() {
         Auth.$createUser({
             email: $scope.email,
             password: $scope.password
         }).then(function(userData) {
-            $scope.message = "User created with uid: " + userData.uid;
-            console.log("coucou");
+            console.log("User created with uid: " + userData.uid);
         }).catch(function(error) {
-            console.log("error");
+            console.error(error);
             $scope.error = error;
         });
     };
 
     $scope.removeUser = function() {
-        $scope.message = null;
-        $scope.error = null;
-
         Auth.$removeUser({
             email: $scope.email,
             password: $scope.password
@@ -220,7 +207,7 @@ app.controller('authController', function(fb, $scope, Auth, $location) {
     // any time auth status updates, add the user data to scope
     $scope.auth.$onAuth(function(authData) {
         $scope.authData = authData;
-
+        console.log(Auth.$getAuth());
     });
 
 });
