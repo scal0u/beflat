@@ -24,6 +24,11 @@ app.config(['$routeProvider', function($routeProvider) {
         controller: 'homeController',
         resolve: resolve,
     })
+    .when('/group/home', {
+        templateUrl: 'views/home.html',
+        controller: 'homeController',
+        resolve: resolve,
+    })
     .when('/events/', {
         templateUrl: 'views/events/index.html',
         controller: 'eventListController',
@@ -63,6 +68,11 @@ app.config(['$routeProvider', function($routeProvider) {
         templateUrl: 'views/events/songs.html',
         controller: 'eventSongsController',
         resolve: resolve,
+    })
+    .when('/test/', {
+        templateUrl: 'views/test.html',
+        controller: 'testController',
+        resolve: resolve,
     });
 }]);
 
@@ -74,18 +84,37 @@ app.factory('fb', ["$firebaseArray", function () {
     return new Firebase("https://beflat.firebaseio.com/");
 }]);
 
-app.factory('group', ["$firebaseArray", "fb", function ($firebaseArray, fb) {
-    return {
-        data: function () {
 
-            var theGroup = {
-                id: "-KGrBTtHxJyADLwIeJ1l",
-                name: "",
+app.factory('user', ["$firebaseObject", "fb", function ($firebaseObject, fb) {
+    return {
+
+        set: function (uid, path, value) {
+    
+            var edited = $firebaseObject(fb.child("users/"+uid+"/"+path));
+            edited.$value = value;
+            edited.$save();
+
+        },
+
+    };
+}]);
+
+
+app.factory('group', ["fb", function (fb) {
+
+    return {
+        data: function (groupId) {
+        
+            var _theGroup = {
+                id: groupId,
                 events: [],
             };
 
-            fb.child("/groups/"+theGroup.id).once('value', function(groupSnap) {
+
+            fb.child("/groups/"+_theGroup.id).once('value', function(groupSnap) {
                 
+                _theGroup.name = groupSnap.val().name;
+
                 // Getting group events
                 var group_events = groupSnap.val().events;
                 for(group_event in group_events) {
@@ -93,13 +122,14 @@ app.factory('group', ["$firebaseArray", "fb", function ($firebaseArray, fb) {
                         var event = eventSnap.val();
                         event.id = group_events[group_event].id;
                         event.date = new Date(event.date);
-                        theGroup.events.push(event);
+                        _theGroup.events.push(event);
                     });
                 }
 
             });
 
-            return theGroup;
+            return _theGroup;
+
         },
 
     };
@@ -133,7 +163,16 @@ app.factory("Auth", ["$firebaseAuth", "fb",
     }
 ]);
 
-app.controller('topBarController', function(fb, $scope, $location, Auth) {
+
+app.controller('testController', function(fb, $scope, user) {
+
+    $scope.page = {
+        title: 'test',
+    };
+
+});
+
+app.controller('topBarController', function(fb, $scope, $location, Auth, user) {
 
     if(Auth.$getAuth()) $scope.auth = true;
     else $scope.auth = false;
@@ -142,23 +181,34 @@ app.controller('topBarController', function(fb, $scope, $location, Auth) {
         $location.path('auth');
         fb.unauth();
     };
-    
+
+    $scope.pick = function(group) {
+        user.set(Auth.$getAuth().uid, "current_group", group);
+        $location.path("/group/home");
+        window.location.reload();
+    };
+
+    fb.child("/groups/").once('value', function(snap) {
+        $scope.groups = snap.val();
+    });
+ 
 });
 
-app.controller('homeController', function(fb, group, $scope, $firebaseObject) {
+app.controller('homeController', function(fb, group, $scope, $firebaseObject, Auth, user) {
 
     $scope.fb = $firebaseObject(fb);
 
-    $scope.group = group.data();
-
-    $scope.page = {
-        rightBtn: {fa: "bell"},
-        title: $scope.group.name,
-    };
+    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
+        $scope.group = group.data(gSnap.val());
+        $scope.page = {
+            rightBtn: {fa: "bell"},
+            title: $scope.group.name,
+        };
+    });
 
 });
 
-app.controller('authController', function(fb, $scope, Auth, $location) {
+app.controller('authController', function(fb, $scope, Auth, $location, $firebaseObject) {
 
     $scope.page = {
         // title: "Login",
@@ -168,12 +218,19 @@ app.controller('authController', function(fb, $scope, Auth, $location) {
 
     $scope.auth = Auth;
 
-    $scope.logIn = function() {
+    $scope.logIn = function(first) {
         $scope.auth.$authWithPassword({
             email: $scope.email,
             password: $scope.password
         }).then(function(authData) {
             console.log("Logged in as:", authData.uid);
+            if($scope.new_user) {
+                var user_slot = $firebaseObject(fb.child("users/"+$scope.new_user.uid));
+                user_slot.$value = {'id': $scope.new_user.uid };
+                user_slot.$save();
+                console.log("user created with uid: " + $scope.new_user.uid);
+                $scope.new_user = false;
+            }
             $location.path('/');
         }).catch(function(error) {
             console.error("Authentication failed:", error);
@@ -182,23 +239,24 @@ app.controller('authController', function(fb, $scope, Auth, $location) {
     };
 
     $scope.signUp = function() {
-        Auth.$createUser({
+        Auth.$createuser({
             email: $scope.email,
             password: $scope.password
         }).then(function(userData) {
-            console.log("User created with uid: " + userData.uid);
+            $scope.new_user = userData;
+            $scope.logIn();
         }).catch(function(error) {
             console.error(error);
             $scope.error = error;
         });
     };
 
-    $scope.removeUser = function() {
-        Auth.$removeUser({
+    $scope.removeuser = function() {
+        Auth.$removeuser({
             email: $scope.email,
             password: $scope.password
         }).then(function() {
-            $scope.message = "User removed";
+            $scope.message = "user removed";
         }).catch(function(error) {
             $scope.error = error;
         });
@@ -207,12 +265,12 @@ app.controller('authController', function(fb, $scope, Auth, $location) {
     // any time auth status updates, add the user data to scope
     $scope.auth.$onAuth(function(authData) {
         $scope.authData = authData;
-        console.log(Auth.$getAuth());
+        // console.log(Auth.$getAuth());
     });
 
 });
 
-app.controller('eventListController', function(fb, group, event, $scope, $firebaseArray) {
+app.controller('eventListController', function(fb, group, event, $scope, $firebaseArray, Auth) {
 
     $scope.page = {
         title: "Events",
@@ -222,11 +280,14 @@ app.controller('eventListController', function(fb, group, event, $scope, $fireba
 
     $scope.fb = $firebaseArray(fb);
 
-    $scope.group = group.data();
     $scope.event = event;
 
+    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
+        $scope.group_id = group.data(gSnap.val());
+    });
+
     $scope.delete = function(event) {
-        $scope.event.delete(event, $scope.group.id);
+        $scope.event.delete(event, $scope.group_id);
     }
 
 });
@@ -321,14 +382,17 @@ app.controller('eventSongsController', function(fb, group, $scope, $firebaseArra
 
 });
 
-app.controller('newEventController', function(fb, group, $scope, $firebaseArray, $location) {
+app.controller('newEventController', function(fb, group, $scope, $firebaseArray, $location, Auth) {
 
     $scope.fb = $firebaseArray(fb);
 
-    $scope.group = group.data();
+    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
+        $scope.group = group.data(gSnap.val());
+        $scope.group_events = $firebaseArray(fb.child("groups/"+$scope.group.id+"/events"));
+    });
+
 
     $scope.events = $firebaseArray(fb.child("events"));
-    $scope.group_events = $firebaseArray(fb.child("groups/"+$scope.group.id+"/events"));
 
     $scope.page = {
         title: "Add event",
