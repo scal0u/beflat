@@ -141,12 +141,17 @@ app.factory('event', ["$firebaseArray", "fb", function ($firebaseArray, fb) {
         delete: function(event, group_id) {
             if(confirm("Do you wish to delete this event?")) {
 
+                console.log("group_id");
+                console.log(group_id);
+
+
                 // Remove in events node
                 fb.child("/events/"+event.id).remove();
 
                 // Remove in group > events node
                 var ref = fb.child("/groups/"+group_id+"/events/");
                 ref.orderByChild("id").equalTo(event.id).on("child_added", function(snapshot) {
+                    console.log("DELETE GROUP EVENT "+snapshot.key());
                     fb.child("/groups/"+group_id+"/events/"+snapshot.key()).remove();
                 });
 
@@ -163,12 +168,21 @@ app.factory("Auth", ["$firebaseAuth", "fb",
     }
 ]);
 
+app.factory("thisUser", ["$firebaseObject", "Auth", "fb",
+    function($firebaseObject, Auth, fb) {
+        return $firebaseObject(fb.child("/users/"+Auth.$getAuth().uid));
+    }
+]);
 
-app.controller('testController', function(fb, $scope, user) {
+
+
+app.controller('testController', function(fb, $scope, thisUser) {
 
     $scope.page = {
         title: 'test',
     };
+
+    $scope.thisUser = thisUser;
 
 });
 
@@ -270,11 +284,11 @@ app.controller('authController', function(fb, $scope, Auth, $location, $firebase
 
 });
 
-app.controller('eventListController', function(fb, group, event, $scope, $firebaseArray, Auth) {
+app.controller('eventListController', function(fb, group, event, $scope, $firebaseArray, Auth, $location, $route) {
 
     $scope.page = {
         title: "Events",
-        leftBtn: "prev",
+        leftBtn: {fa: "chevron-left", href: "#"},
         rightBtn: {fa: "plus", href: "events/new"},
     };
 
@@ -283,12 +297,14 @@ app.controller('eventListController', function(fb, group, event, $scope, $fireba
     $scope.event = event;
 
     fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
-        $scope.group_id = group.data(gSnap.val());
+        $scope.group = group.data(gSnap.val());
+        $scope.delete = function(event) {
+            $scope.event.delete(event, $scope.group.id);
+            $location.path('events/');
+            $route.reload();
+        }
     });
 
-    $scope.delete = function(event) {
-        $scope.event.delete(event, $scope.group_id);
-    }
 
 });
 
@@ -298,7 +314,7 @@ app.controller('singleEventController', function(fb, group, $scope, $firebaseArr
     $scope.id = $scope.params.eventId;
 
     $scope.page = {
-        leftBtn: {fa: "chevron-left", href: "/"},
+        leftBtn: {fa: "chevron-left", href: "events/"},
         rightBtn: {fa: "edit", href: "events/"+$scope.id+"/edit"},
         title: "Event",
     };
@@ -384,15 +400,11 @@ app.controller('eventSongsController', function(fb, group, $scope, $firebaseArra
 
 app.controller('newEventController', function(fb, group, $scope, $firebaseArray, $location, Auth) {
 
-    $scope.fb = $firebaseArray(fb);
-
-    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
-        $scope.group = group.data(gSnap.val());
-        $scope.group_events = $firebaseArray(fb.child("groups/"+$scope.group.id+"/events"));
-    });
-
-
-    $scope.events = $firebaseArray(fb.child("events"));
+    $scope.event = {
+        title: "", 
+        type: "rehearsal",
+        // date: new Date(),
+    };
 
     $scope.page = {
         title: "Add event",
@@ -400,22 +412,26 @@ app.controller('newEventController', function(fb, group, $scope, $firebaseArray,
         rightBtn: "submit",
     };
 
-    $scope.event = {
-        title: "", 
-        type: "rehearsal",
-        // date: new Date(),
-    };
+    $scope.fb = $firebaseArray(fb);
 
-    $scope.addEvent = function() {
-        $scope.event.date = $scope.event.date.toString();
-        $scope.events.$add($scope.event).then(function(ref) {
-            var id = ref.key();
-            console.log("added record with id " + id);
-            $scope.group_events.$add({'id': id}).then(function(ref) {
-                $location.path('events/');
+    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
+        $scope.group = group.data(gSnap.val());
+        $scope.group_events = $firebaseArray(fb.child("groups/"+$scope.group.id+"/events"));
+        $scope.events = $firebaseArray(fb.child("events"));
+
+        $scope.addEvent = function() {
+            $scope.event.date = $scope.event.date.toString();
+            $scope.events.$add($scope.event).then(function(ref) {
+                var id = ref.key();
+                console.log("added event with id " + id);
+                $scope.group_events.$add({'id': id}).then(function(ref) {
+                    $location.path('events/');
+                });
             });
-        });
-    };
+        };
+
+    });
+
 
 });
 
