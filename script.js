@@ -49,6 +49,16 @@ app.config(['$routeProvider', function($routeProvider) {
         controller: 'eventEditController',
         resolve: resolve,
     })
+    .when('/songs/', {
+        templateUrl: 'views/songs/index.html',
+        controller: 'songListController',
+        resolve: resolve,
+    })
+    .when('/songs/new/', {
+        templateUrl: 'views/songs/new.html',
+        controller: 'newSongController',
+        resolve: resolve,
+    })
     .when('/songs/new/:eventId', {
         templateUrl: 'views/songs/new.html',
         controller: 'newSongController',
@@ -212,12 +222,45 @@ app.controller('homeController', function(fb, group, $scope, $firebaseObject, Au
 
     $scope.fb = $firebaseObject(fb);
 
+    // Getting user's group
     fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
         $scope.group = group.data(gSnap.val());
         $scope.page = {
             rightBtn: {fa: "bell"},
             title: $scope.group.name,
         };
+        // Getting group's songs
+        fb.child("/groups/"+gSnap.val()+"/tracks").once('value', function(plSnap) {
+        });
+    });
+
+});
+
+app.controller('songListController', function(fb, group, $scope, $firebaseObject, Auth, user) {
+
+    $scope.fb = $firebaseObject(fb);
+
+
+    $scope.page = {
+        title: "Songs",
+        leftBtn: {fa: "chevron-left", href: "/"},
+        rightBtn: {fa: "plus", href: "songs/new"},
+    };
+
+
+    // Getting user's group
+    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
+        $scope.group = group.data(gSnap.val());
+        // Getting group's songs
+        fb.child("/groups/"+gSnap.val()+"/tracks").once('value', function(plSnap) {
+            $scope.tracks = [];
+            for (song in plSnap.val()) {
+                // Getting each song's name
+                fb.child("/tracks/"+plSnap.val()[song].id).once('value', function(sSnap) {
+                    $scope.tracks.push({id: plSnap.val()[song].id, name: sSnap.val().name});
+                });
+            }
+        });
     });
 
 });
@@ -454,13 +497,17 @@ app.controller('newSongController', function(fb, $scope, $firebaseArray, $routeP
                 var id = ref.key();
                 console.log("added song with id " + id);
                 $scope.group_tracks.$add({'id': id}).then(function(ref) {
-                    $location.path('events/'+$scope.params.eventId+'/songs');
+                    if($scope.params.eventId) {
+                        $location.path('events/'+$scope.params.eventId+'/songs');
+                    }
+                    else {
+                        $location.path('songs/');
+                    }
                 });
             });
         };
 
     });
-
 
     $scope.page = {
         title: "Add song",
