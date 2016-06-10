@@ -1,7 +1,7 @@
 <top-bar></top-bar>
 
 <div class="list-group list-group-flush row">
-	<li class="list-group-item" ng-repeat="(key, track) in existing_tracks" ng-click="addTrack(key)">
+	<li class="list-group-item" ng-repeat="(key, track) in tracks" ng-click="addTrack(track.id)">
 	    {{ track.name }}
 	</li>
 </div>
