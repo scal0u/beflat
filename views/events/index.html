@@ -1,7 +1,7 @@
 <top-bar></top-bar>
 
 <ul class="list-group list-group-flush row">
-    <li class="list-group-item" ng-repeat="event in group.events">
+    <li class="list-group-item" ng-repeat="event in group.events | orderBy: '-date'">
         <a class="pull-right btn" ng-click="delete(event)">
         	<i class="fa fa-trash"></i>
     	</a>

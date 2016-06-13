@@ -16,7 +16,7 @@
                 </div>
             </div>
         </li>
-        <li class="list-group-item" ng-repeat="event in group.events | limitTo: 2"> 
+        <li class="list-group-item" ng-repeat="event in group.events | orderBy: '-date' | limitTo: 2 " ng-if="event.date > now"> 
             <a href="#/events/{{ event.id }}">
                 <time><small>{{ event.date | date }}</small></time>
                 <p class="h6">{{ event.title }}</p>

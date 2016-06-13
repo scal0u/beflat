@@ -282,6 +282,7 @@ app.controller('homeController', function(fb, group, $scope, $firebaseObject, Au
             if(!gSnap.val()) $location.path("/group/pick");
             else {
                 $scope.group = group.data(gSnap.val());
+                $scope.now = new Date();
                 $scope.page = {
                     rightBtn: {fa: "bell"},
                     title: $scope.group.name,
@@ -290,8 +291,8 @@ app.controller('homeController', function(fb, group, $scope, $firebaseObject, Au
         });
     }
 
-
 });
+
 
 app.controller('songListController', function(fb, group, $scope, $firebaseObject, Auth, user) {
 
