@@ -232,7 +232,6 @@ app.controller('pickGroupController', function(fb, $scope, $location, $firebaseA
         var refGroupUsers = fb.child("/groups/"+id+"/users/"+Auth.$getAuth().uid);
 
         refGroupUsers.once('value', function (data) {
-            console.log(data.val().status);
             if(data.val().status == "member" || data.val().status == "admin") {
                 user.set(Auth.$getAuth().uid, "current_group", id);
                 $location.path("/group/home");
