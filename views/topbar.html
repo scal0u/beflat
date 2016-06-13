@@ -4,14 +4,8 @@
 
 
 	    	<div ng-controller="topBarController" class="panel">
-				
-				<div class="card">
-					<p class="h4 card-block">My groups</p>
-					<ul class="list-group list-group-flush">
-						<li class="list-group-item" ng-repeat="(key, group) in groups" ng-click="pick(key)" ng-class="{'active': group.name == page.title }"> {{ group.name }}</li>
-					</ul>
-				</div>
-	
+				<a href="#/group/pick"> Other groups </a>
+				<hr>
 				<button class="btn btn-primary" ng-click="logOut()" ng-show="auth">
 					<i class="fa fa-sign-out"></i> Log out
 				</button>

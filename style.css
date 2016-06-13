@@ -5,6 +5,6 @@ body {
 	padding-bottom: 40px;
 }
 
-.topbar .card {
-	color: black !important;
+.uppercase {
+	text-transform: uppercase;
 }

@@ -20,8 +20,12 @@ app.config(['$routeProvider', function($routeProvider) {
         controller: 'authController',
     })
     .when('/', {
-        templateUrl: 'views/home.html',
-        controller: 'homeController',
+        templateUrl: 'views/auth.html',
+        controller: 'authController',
+    })
+    .when('/group/pick', {
+        templateUrl: 'views/pick_group.html',
+        controller: 'pickGroupController',
         resolve: resolve,
     })
     .when('/group/home', {
@@ -196,6 +200,63 @@ app.controller('testController', function(fb, $scope, thisUser) {
 
 });
 
+app.controller('pickGroupController', function(fb, $scope, $location, $firebaseArray, $firebaseObject, Auth, user) {
+
+    $scope.page = {
+        title: 'Groups',
+        rightBtn: {fa: "plus"},
+    };
+
+    $scope.groups = $firebaseArray(fb.child("/groups/"));
+    $scope.groups_obj = $firebaseObject(fb.child("/groups/"));
+    $scope.user_groups = $firebaseObject(fb.child("users/"+Auth.$getAuth().uid+"/groups/"));
+
+    $scope.askToJoin = function(id) {
+        // Add to this user's groups
+        var refUserGroups = fb.child("/users/"+Auth.$getAuth().uid+"/groups/"+id);
+        var userGroups = $firebaseObject(refUserGroups);
+        userGroups.status = "pending";
+        userGroups.$save().then(function(ref) {
+            // Add to group's users
+            var refGroupUsers = fb.child("/groups/"+id+"/users/"+Auth.$getAuth().uid);
+            var groupUsers = $firebaseObject(refGroupUsers);
+            groupUsers.status = "pending";
+            groupUsers.$save().then( function(ref) { console.log(ref); }, function(error) {} );
+        }, function(error) {
+            console.log("Error:", error);
+        });
+
+    };
+
+    $scope.pick = function(id) {
+        var refGroupUsers = fb.child("/groups/"+id+"/users/"+Auth.$getAuth().uid);
+
+        refGroupUsers.once('value', function (data) {
+            console.log(data.val().status);
+            if(data.val().status == "member" || data.val().status == "admin") {
+                user.set(Auth.$getAuth().uid, "current_group", id);
+                $location.path("/group/home");
+                $route.reload();
+            }
+            else {
+                alert("Sorry, you don't belong to that group yet.");
+            }
+        }, function (err) {
+            alert("Sorry, an error occured");
+            console.log(err);
+        });
+
+        
+    };
+
+
+    $scope.createGroup = function() {
+        // Insert new group with $scope.name + $scope.type
+        // .then set group/newRef/admin as auth.uid
+    };
+
+});
+
 app.controller('topBarController', function(fb, $scope, $location, Auth, user) {
 
     if(Auth.$getAuth()) $scope.auth = true;
@@ -206,33 +267,30 @@ app.controller('topBarController', function(fb, $scope, $location, Auth, user) {
         fb.unauth();
     };
 
-    $scope.pick = function(group) {
-        user.set(Auth.$getAuth().uid, "current_group", group);
-        $location.path("/group/home");
-        window.location.reload();
-    };
-
     fb.child("/groups/").once('value', function(snap) {
         $scope.groups = snap.val();
     });
  
 });
 
-app.controller('homeController', function(fb, group, $scope, $firebaseObject, Auth, user) {
+app.controller('homeController', function(fb, group, $scope, $firebaseObject, Auth, user, $location) {
 
     $scope.fb = $firebaseObject(fb);
 
-    // Getting user's group
-    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
-        $scope.group = group.data(gSnap.val());
-        $scope.page = {
-            rightBtn: {fa: "bell"},
-            title: $scope.group.name,
-        };
-        // Getting group's songs
-        fb.child("/groups/"+gSnap.val()+"/tracks").once('value', function(plSnap) {
+    if(Auth.$getAuth()) {  
+        // Getting user's group
+        fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
+            if(!gSnap.val()) $location.path("/group/pick");
+            else {
+                $scope.group = group.data(gSnap.val());
+                $scope.page = {
+                    rightBtn: {fa: "bell"},
+                    title: $scope.group.name,
+                };
+            }
         });
-    });
+    }
+
 
 });
 
@@ -243,7 +301,7 @@ app.controller('songListController', function(fb, group, $scope, $firebaseObject
 
     $scope.page = {
         title: "Songs",
-        leftBtn: {fa: "chevron-left", href: "/"},
+        leftBtn: {fa: "chevron-left", href: "group/home"},
         rightBtn: {fa: "plus", href: "songs/new"},
     };
 
@@ -288,7 +346,7 @@ app.controller('authController', function(fb, $scope, Auth, $location, $firebase
                 console.log("user created with uid: " + $scope.new_user.uid);
                 $scope.new_user = false;
             }
-            $location.path('/');
+            $location.path('/group/home');
         }).catch(function(error) {
             console.error("Authentication failed:", error);
             $scope.error = error;
@@ -296,7 +354,7 @@ app.controller('authController', function(fb, $scope, Auth, $location, $firebase
     };
 
     $scope.signUp = function() {
-        Auth.$createuser({
+        $scope.auth.$createUser({
             email: $scope.email,
             password: $scope.password
         }).then(function(userData) {
@@ -308,8 +366,8 @@ app.controller('authController', function(fb, $scope, Auth, $location, $firebase
         });
     };
 
-    $scope.removeuser = function() {
-        Auth.$removeuser({
+    $scope.removeUser = function() {
+        $scope.auth.$removeuser({
             email: $scope.email,
             password: $scope.password
         }).then(function() {
@@ -331,7 +389,7 @@ app.controller('eventListController', function(fb, group, event, $scope, $fireba
 
     $scope.page = {
         title: "Events",
-        leftBtn: {fa: "chevron-left", href: "#"},
+        leftBtn: {fa: "chevron-left", href: "group/home"},
         rightBtn: {fa: "plus", href: "events/new"},
     };
 
@@ -479,8 +537,8 @@ app.controller('newEventController', function(fb, group, $scope, $firebaseArray,
 
     });
 
-
 });
+
 
 app.controller('newSongController', function(fb, $scope, $firebaseArray, $routeParams, $location, Auth) {
 

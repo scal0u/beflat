@@ -1,0 +1,29 @@
+<top-bar></top-bar>
+
+
+<div class="card">
+	<input type="search" ng-model="query" class="form-control" placeholder="Search groups">
+	<ul ng-show="query" class="list-group list-group-flush">
+		<li ng-repeat="group in groups | limitTo: 20 | filter:query" class="list-group-item" ng-show="!user_groups[group.$id].status">
+			<button type="button" class="btn btn-secondary pull-right btn-sm" title="Join group" ng-click="checkRequest(group.$id)" ng-hide="user_groups[group.$id].status" >
+				<i class="fa fa-user-plus"></i>
+			</button>
+			{{ group.name }}
+			<br>
+			<small ng-show="group.type" class="label label-default"> {{ group.type }} </small>
+		</li>
+	</ul>
+</div>
+
+<hr>
+
+<h3>My groups</h3>
+<ul class="list-group list-group-flush">
+	<li class="list-group-item" ng-repeat="(key, group) in user_groups" ng-click="pick(key)">
+		{{ groups_obj[key].name }}
+		<br>
+		<i class="fa fa-chevron-right fa-lg pull-right" ng-show="group.status == 'member' || group.status == 'admin'"></i>
+		<small ng-show="group.status == 'pending'"> You sent a request </small>
+		<small ng-show="group.status == 'member'"> You're a member </small>
+	</li>
+</ul>
