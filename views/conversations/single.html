@@ -1,12 +1,21 @@
 <top-bar></top-bar>
 
-
-{{ conversation }}
-
-
-<ul class="list-group">
-	<li class="list-group-item" ng-repeat="message in conversation.messages">
-		{{ message.author }} says:
+<ul class="list-group list-group-flush" style="padding-bottom: 100px;">
+	<li class="list-group-item" ng-repeat="message in messages | limitTo: -10" ng-class="{'text-right': message.author == user_email} ">
+		<span class="label label-default label-pill" ng-if="message.author != user_email">{{ message.author }}</span>
+		<span class="label label-primary label-pill" ng-if="message.author == user_email">Me</span>
+		<small> {{ message.date | parseDate | date: "h:mm a" }} </small>
 		<div> {{ message.text }} </div>
 	</li>
 </ul>
+
+<form ng-submit="send()" class="card" style="position: fixed; bottom: 0; left: 0; margin-bottom: 0;">
+	<div class="form-group card-block" style="margin-bottom: 0;">
+		<div class="input-group">
+			<input type="text" class="form-control" placeholder="New message" ng-model="compose" autofocus>
+			<div class="input-group-addon btn btn-default" ng-class="{'disabled': !compose}" ng-click="send()">
+				<i class="fa fa-send"></i>
+			</div>
+		</div>
+	</div>
+</form>

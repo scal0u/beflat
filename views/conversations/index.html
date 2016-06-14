@@ -1,1 +1,13 @@
 <top-bar></top-bar>
+
+<ul class="list-group list-group-flush">
+	<li class="list-group-item" ng-repeat="conversation in conversations">
+		<a href="#/conversations/{{ conversation.$id }}">
+			<p class="h6"><i class="fa fa-comment"></i> Group chat </p>
+			<small>
+				{{ latest(conversation).text | limitTo: 40 }}
+				<span ng-if="latest(conversation).text.length > 40">...</span>
+			</small>
+		</a>
+	</li>
+</ul>

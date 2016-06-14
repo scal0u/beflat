@@ -109,6 +109,12 @@ app.directive("topBar", function() {
     return {templateUrl : "views/topbar.html"};
 });
 
+app.filter('parseDate', function() {
+    return function(input) {
+        return new Date(input);
+    };
+});
+
 app.factory('fb', ["$firebaseArray", function () {
     return new Firebase("https://beflat.firebaseio.com/");
 }]);
@@ -309,13 +315,30 @@ app.controller('homeController', function(fb, group, $scope, $firebaseObject, Au
 });
 
 
-app.controller('messageListController', function(fb, group, $scope, $firebaseObject, Auth) {
+app.controller('messageListController', function(fb, group, $scope, $firebaseArray, Auth) {
 
     $scope.page = {
         title: "Conversations",
         leftBtn: {fa: "chevron-left", href: "group/home"},
-        rightBtn: {fa: "plus", href: "conversations/single"},
+        rightBtn: {fa: "plus", href: "conversations/new"},
     };
+
+    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
+        $scope.conversations = $firebaseArray(fb.child("groups/"+gSnap.val()+"/conversations"));
+    });
+
+    $scope.latest = function(conversation) {
+
+        var array = [];
+        var total = 0;
+        angular.forEach(conversation.messages, function(element) {
+            array.push(element);
+            total++;
+        });
+
+        return array[total-1];
+
+    }
 
 });
 
@@ -338,17 +361,52 @@ app.controller('newMessageController', function(fb, group, $scope, $firebaseArra
 });
 
 
-app.controller('singleMessageController', function(fb, $scope, group, $firebaseArray, Auth, $routeParams) {
+app.controller('singleMessageController', function(fb, $scope, group, $firebaseObject, $firebaseArray, Auth, $routeParams) {
+
+    $scope.page = {
+        title: "Group chat",
+        leftBtn: {fa: "chevron-left", href: "conversations"},
+        // rightBtn: {fa: "user-plus"},
+    };
+
+    $scope.user_email = Auth.$getAuth().password.email;
+
+    $scope.keepUp = function() {
+        // window.scrollTo(0,document.body.scrollHeight);
+        $('html,body').animate({scrollTop: document.body.scrollHeight},"fast");
+    };
 
     $scope.id = $routeParams.id;
 
     fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
         $scope.group = group.data(gSnap.val());
-
-        fb.child("/groups/"+gSnap.val()+"/conversations/"+$scope.id).once('value', function(cSnap) {
-            $scope.conversation = cSnap.val();
+        var url = "/groups/"+gSnap.val()+"/conversations/"+$scope.id;
+        $scope.conversation = $firebaseObject(fb.child(url));
+        $scope.messages = $firebaseArray(fb.child(url+"/messages"));
+        fb.child(url+"/messages").on('child_added', function(childSnapshot, prevChildKey) {
+            $scope.keepUp();
         });
+    });
 
+    $scope.send = function() {
+        if($scope.compose) {
+            $scope.messages
+            .$add({
+                text: $scope.compose,
+                author: Auth.$getAuth().password.email,
+                date: new Date().toString(),
+            })
+            .then(function(ref) {
+                $scope.keepUp();
+                $scope.compose = "";
+            });
+        }
+    };
+
+    angular.element(document).ready(function () {
+        setTimeout(function() {
+            $scope.keepUp();
+        }, 1000);
     });
 
 
