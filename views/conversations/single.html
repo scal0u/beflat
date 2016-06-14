@@ -1,0 +1,12 @@
+<top-bar></top-bar>
+
+
+{{ conversation }}
+
+
+<ul class="list-group">
+	<li class="list-group-item" ng-repeat="message in conversation.messages">
+		{{ message.author }} says:
+		<div> {{ message.text }} </div>
+	</li>
+</ul>

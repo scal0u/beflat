@@ -33,6 +33,21 @@ app.config(['$routeProvider', function($routeProvider) {
         controller: 'homeController',
         resolve: resolve,
     })
+    .when('/conversations/', {
+        templateUrl: 'views/conversations/index.html',
+        controller: 'messageListController',
+        resolve: resolve,
+    })
+    .when('/conversations/new', {
+        templateUrl: 'views/conversations/new.html',
+        controller: 'newMessageController',
+        resolve: resolve,
+    })
+    .when('/conversations/:id', {
+        templateUrl: 'views/conversations/single.html',
+        controller: 'singleMessageController',
+        resolve: resolve,
+    })
     .when('/events/', {
         templateUrl: 'views/events/index.html',
         controller: 'eventListController',
@@ -294,6 +309,52 @@ app.controller('homeController', function(fb, group, $scope, $firebaseObject, Au
 });
 
 
+app.controller('messageListController', function(fb, group, $scope, $firebaseObject, Auth) {
+
+    $scope.page = {
+        title: "Conversations",
+        leftBtn: {fa: "chevron-left", href: "group/home"},
+        rightBtn: {fa: "plus", href: "conversations/single"},
+    };
+
+});
+
+app.controller('newMessageController', function(fb, group, $scope, $firebaseArray, Auth, $location) {
+
+    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
+        // $scope.group = group.data(gSnap.val());
+        $scope.conversations = $firebaseArray(fb.child("groups/"+gSnap.val()+"/conversations"));
+        var new_chat = {
+            // date: new Date(),
+            created_by: Auth.$getAuth().uid,
+            messages: [],
+        };
+        $scope.conversations.$add(new_chat).then(function(ref) {
+            $location.path('conversations/'+ref.key());
+        });
+    });
+
+
+});
+
+
+app.controller('singleMessageController', function(fb, $scope, group, $firebaseArray, Auth, $routeParams) {
+
+    $scope.id = $routeParams.id;
+
+    fb.child("/users/"+Auth.$getAuth().uid+"/current_group").once('value', function(gSnap) {
+        $scope.group = group.data(gSnap.val());
+
+        fb.child("/groups/"+gSnap.val()+"/conversations/"+$scope.id).once('value', function(cSnap) {
+            $scope.conversation = cSnap.val();
+        });
+
+    });
+
+
+});
+
+
 app.controller('songListController', function(fb, group, $scope, $firebaseObject, Auth, user) {
 
     $scope.fb = $firebaseObject(fb);
@@ -315,7 +376,7 @@ app.controller('songListController', function(fb, group, $scope, $firebaseObject
             for (song in plSnap.val()) {
                 // Getting each song's name
                 fb.child("/tracks/"+plSnap.val()[song].id).once('value', function(sSnap) {
-                    $scope.tracks.push({id: plSnap.val()[song].id, name: sSnap.val().name});
+                    $scope.tracks.push({id: plSnap.val()[song].id, name: sSnap.val().name, artist: sSnap.val().artist});
                 });
             }
         });

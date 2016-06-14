@@ -1,10 +1,10 @@
 <top-bar></top-bar>
 
 <ul class="list-group list-group-flush row">
-    <li class="list-group-item" ng-repeat="track in tracks"> 
+    <li class="list-group-item" ng-repeat="track in tracks | orderBy: 'name' "> 
         <a href="#/songs/{{ track.id }}">
             <p class="h6">{{ track.name }}</p>
+            <small>{{ track.artist }}</small>
         </a>
-        <time><small>{{ track.date | date }}</small></time>
     </li>
 </ul>

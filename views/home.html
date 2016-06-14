@@ -1,6 +1,6 @@
 <top-bar></top-bar>
 
-<div class="card">
+<div class="card" ng-show="group.events[0]">
     <ul class="list-group list-group-flush">
         <li class="list-group-item lead">
             <div class="row">
@@ -36,14 +36,16 @@
         <a href="#/songs">
             <div class="btn btn-default">
                 <i class="fa fa-headphones fa-4x"></i>
-                <p class="card-text pTop">Songs</p>
+                <p class="card-text pTop">Music</p>
             </div>
         </a>
     </div>
     <div class="col-xs-6">
-        <div class="btn btn-default">
-            <i class="fa fa-comment fa-4x"></i>
-            <p class="card-text pTop">Messages</p>
-        </div>
+        <a href="#/conversations">
+            <div class="btn btn-default">
+                <i class="fa fa-comment fa-4x"></i>
+                <p class="card-text pTop">Messages</p>
+            </div>
+        </a>
     </div>
 </div>
