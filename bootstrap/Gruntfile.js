@@ -254,7 +254,7 @@ module.exports = function (grunt) {
             autoprefixer
           ]
         },
-        src: 'dist/css/*.css'
+        src: '../public/css/*.css'
       },
       docs: {
         options: {
@@ -290,9 +290,9 @@ module.exports = function (grunt) {
         files: [
           {
             expand: true,
-            cwd: 'dist/css',
+            cwd: '../public/css',
             src: ['*.css', '!*.min.css'],
-            dest: 'dist/css',
+            dest: '../public/css',
             ext: '.min.css'
           }
         ]
@@ -309,9 +309,9 @@ module.exports = function (grunt) {
       },
       dist: {
         expand: true,
-        cwd: 'dist/css/',
+        cwd: '../public/css/',
         src: ['*.css', '!*.min.css'],
-        dest: 'dist/css/'
+        dest: '../public/css/'
       },
       examples: {
         expand: true,
@@ -496,6 +496,8 @@ module.exports = function (grunt) {
   // CSS distribution task.
   // Supported Compilers: sass (Ruby) and libsass.
   (function (sassCompilerName) {
+    console.log("sassCompilerName");
+    console.log(sassCompilerName);
     require('./grunt/bs-sass-compile/' + sassCompilerName + '.js')(grunt);
   })(process.env.TWBS_SASS || 'libsass');
   // grunt.registerTask('sass-compile', ['sass:core', 'sass:extras', 'sass:docs']);

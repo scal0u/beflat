@@ -1,5 +1,16 @@
 // Code goes here
 
+$(document).ready(function(){
+        // iOS web app full screen hacks.
+        if(window.navigator.standalone == true) {
+                // make all link remain in web app mode.
+                $('a').click(function() {
+                        window.location = $(this).attr('href');
+            return false;
+                });
+        }
+});
+
 var app = angular.module('myApp', ["firebase", "ngRoute"]);
 
 app.run(["$rootScope", "$location", function($rootScope, $location) {

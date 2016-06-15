@@ -13,14 +13,14 @@ module.exports = function configureLibsass(grunt) {
       },
       core: {
         files: {
-          'dist/css/<%= pkg.name %>.css': 'scss/<%= pkg.name %>.scss'
+          '../public/css/<%= pkg.name %>.css': 'scss/<%= pkg.name %>.scss'
         }
       },
       extras: {
         files: {
-          'dist/css/<%= pkg.name %>-flex.css': 'scss/<%= pkg.name %>-flex.scss',
-          'dist/css/<%= pkg.name %>-grid.css': 'scss/<%= pkg.name %>-grid.scss',
-          'dist/css/<%= pkg.name %>-reboot.css': 'scss/<%= pkg.name %>-reboot.scss'
+          '../public/css/<%= pkg.name %>-flex.css': 'scss/<%= pkg.name %>-flex.scss',
+          '../public/css/<%= pkg.name %>-grid.css': 'scss/<%= pkg.name %>-grid.scss',
+          '../public/css/<%= pkg.name %>-reboot.css': 'scss/<%= pkg.name %>-reboot.scss'
         }
       },
       docs: {
